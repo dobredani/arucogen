@@ -1,4 +1,19 @@
-function generateMarkerSvg(width, height, bits) {
+var pen_width = 0.01;
+
+	function generateMarkerSvg(width, height, bits) {
+		// infill is an integer represnting how many inner pixels to add
+		function appendPixel(argsvg, argx, argy, argwidth, argheight, infill) {
+			for (xi=infill; xi>=1; xi--){
+				$('<rect/>').attr({
+					x: pen_width + argx + 0.5 - (xi/infill)/2,
+					y: pen_width + argy + 0.5 - (xi/infill)/2,
+					width: argwidth - 1 + xi/infill - pen_width * 2,
+					height: argheight - 1 + xi/infill - pen_width * 2,
+					fill: (xi % 2 != 0) ? 'gray' : 'black'
+				}).appendTo(argsvg);
+			}
+		}
+
 	var svg = $('<svg/>').attr({
 		viewBox: '0 0 ' + (width + 2) + ' ' + (height + 2),
 		xmlns: 'http://www.w3.org/2000/svg',
@@ -6,26 +21,17 @@ function generateMarkerSvg(width, height, bits) {
 	});
 
 	// Background rect
-	$('<rect/>').attr({
-		x: 0,
-		y: 0,
-		width: width + 2,
-		height: height + 2,
-		fill: 'black'
-	}).appendTo(svg);
+	appendPixel(svg, 1, 0, width + 1, 1, 6);
+	appendPixel(svg, 0, height+1, width + 1, 1, 6);
+	appendPixel(svg, width+1, 1, 1, height + 1, 6);
+	appendPixel(svg, 0, 0, 1, height + 1, 6);
 
 	// "Pixels"
 	for (var i = 0; i < height; i++) {
 		for (var j = 0; j < width; j++) {
-			var color = bits[i * height + j] ? 'white' : 'black';
-			var pixel = $('<rect/>').attr({
-				width: 1,
-				height: 1,
-				x: j + 1,
-				y: i + 1,
-				fill: color
-			});
-			pixel.appendTo(svg);
+			if (!bits[i * height + j]){
+			appendPixel(svg,  j + 1, i + 1, 1, 1,6);
+		}
 		}
 	}
 
